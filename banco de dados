@@ -1,0 +1,105 @@
+CREATE DATABASE IF NOT EXISTS sistema_univc;
+USE sistema_univc;
+
+-- Tabela de Clientes
+CREATE TABLE IF NOT EXISTS clientes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    cpf VARCHAR(14) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL,
+    empresa VARCHAR(100),
+    cargo VARCHAR(50),
+    idade INT,
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Exames
+CREATE TABLE IF NOT EXISTS exames (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    tipo VARCHAR(50),
+    categoria VARCHAR(50),
+    preparacao TEXT,
+    duracao VARCHAR(50),
+    observacoes TEXT,
+    descricao VARCHAR(500),
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Associação Cliente x Exames
+CREATE TABLE IF NOT EXISTS cliente_exames (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cliente_id INT NOT NULL,
+    exame_id INT NOT NULL,
+    data_associacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
+    FOREIGN KEY (exame_id) REFERENCES exames(id) ON DELETE CASCADE
+);
+
+-- Tabela de Documentos
+CREATE TABLE IF NOT EXISTS documentos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cliente_id INT NOT NULL,
+    nome_arquivo VARCHAR(255) NOT NULL,
+    caminho_arquivo VARCHAR(255) NOT NULL,
+    data_upload TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+);
+
+-- Tabela de Empresas
+CREATE TABLE IF NOT EXISTS empresas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    nome_fantasia VARCHAR(255),
+    cnpj VARCHAR(20) NOT NULL,
+    endereco VARCHAR(255)
+);
+
+-- Tabela de Admins (1 único admin no sistema)
+CREATE TABLE IF NOT EXISTS admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Usuários (acesso com níveis)
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    usuario VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    nivel_acesso INT DEFAULT 0,
+    funcao VARCHAR(100),
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Contas para Clientes (login individual)
+CREATE TABLE IF NOT EXISTS cliente_contas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cliente_id INT NOT NULL,
+    login VARCHAR(100) NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    email VARCHAR(100),
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+);
+
+CREATE TABLE devs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    nivel INT NOT NULL DEFAULT 1,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE devs ADD COLUMN funcao VARCHAR(100) DEFAULT '';
+
+ALTER TABLE cliente_exames ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'pendente';
+ALTER TABLE cliente_exames ADD COLUMN data_realizacao DATE NULL;
+ALTER TABLE cliente_exames ADD COLUMN observacoes TEXT NULL;
+ALTER TABLE exames ADD status VARCHAR(50);
+
